@@ -23,6 +23,10 @@ import { Request, Response } from 'express';
 import { RequestContext } from '@mastra/core/di';
 import { CheckPolicies } from '@gitroom/backend/services/auth/permissions/permissions.ability';
 import { AuthorizationActions, Sections } from '@gitroom/backend/services/auth/permissions/permission.exception.class';
+import { getOpenAIModel } from '@gitroom/nestjs-libraries/openai/openai.config';
+
+// @copilotkit/runtime constructs its own OpenAI client internally when none is
+// passed, which already reads OPENAI_API_KEY / OPENAI_BASE_URL from process.env.
 
 export type ChannelsContext = {
   integrations: string;
@@ -50,7 +54,7 @@ export class CopilotController {
       endpoint: '/copilot/chat',
       runtime: new CopilotRuntime(),
       serviceAdapter: new OpenAIAdapter({
-        model: 'gpt-4.1',
+        model: getOpenAIModel('gpt-4.1'),
       }),
     });
 
@@ -96,7 +100,7 @@ export class CopilotController {
       runtime,
       // properties: req.body.variables.properties,
       serviceAdapter: new OpenAIAdapter({
-        model: 'gpt-4.1',
+        model: getOpenAIModel('gpt-4.1'),
       }),
     });
 
