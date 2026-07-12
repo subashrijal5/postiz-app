@@ -87,7 +87,7 @@ export const OnboardingModal: FC<OnboardingModalProps> = ({ onClose }) => {
                     step === 2 ? 'font-medium' : 'text-textColor'
                   )}
                 >
-                  {t('watch_tutorial', 'Watch Tutorial')}
+                  {t('watch_tutorial', "You're All Set")}
                 </span>
               </div>
             </div>
@@ -214,7 +214,7 @@ const OnboardingStep1: FC<{ onNext: () => void; onSkip: () => void }> = ({
       <div className="flex justify-end pt-[24px] mt-[8px]">
         <button
           onClick={onNext}
-          className="group flex items-center gap-[12px] bg-gradient-to-r from-[#622aff] to-[#8b5cf6] hover:from-[#7c3aff] hover:to-[#9d6eff] text-white font-semibold px-[32px] py-[14px] rounded-[12px] text-[16px] transition-all shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40"
+          className="group flex items-center gap-[12px] bg-gradient-to-r from-[#E02822] to-[#8b5cf6] hover:from-[#E02822] hover:to-[#9d6eff] text-white font-semibold px-[32px] py-[14px] rounded-[12px] text-[16px] transition-all shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40"
         >
           {sortedIntegrations.length > 0
             ? t('continue', 'Continue')
@@ -250,27 +250,48 @@ const OnboardingStep2: FC<{ onBack: () => void; onFinish: () => void }> = ({
     <div className="flex flex-col gap-[24px] flex-1">
       <div className="flex gap-[4px] flex-col text-center">
         <div className="text-[24px] font-semibold">
-          {t('watch_tutorial_title', 'Learn How to Use Postiz')}
+          {t('watch_tutorial_title', "You're All Set!")}
         </div>
         <div className="text-[14px] text-customColor18">
           {t(
             'watch_tutorial_description',
-            'Watch this short video to learn how to get the most out of Postiz'
+            'Thanks for setting up publishr — you are ready to start scheduling.'
           )}
         </div>
       </div>
 
-      {/* YouTube Video Embed */}
-      <div className="relative flex-1 rounded-[12px] overflow-hidden">
-        <div className="absolute left-0 top-0 w-full h-full flex justify-center">
-          <iframe
-            className="h-full aspect-video"
-            src="https://www.youtube.com/embed/BdsCVvEYgHU?si=vvhaZJ8I5oXXvVJS?autoplay=1"
-            title="Postiz Tutorial"
-            allow="autoplay"
-            allowFullScreen
-          />
+      {/* Open-source credit */}
+      <div className="relative flex-1 rounded-[12px] overflow-hidden border border-newColColor bg-newTableHeader/40 flex flex-col items-center justify-center gap-[20px] p-[40px] text-center">
+        <div className="w-[56px] h-[56px] rounded-full bg-newBgColorInner flex items-center justify-center border border-newColColor">
+          <svg
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+          </svg>
         </div>
+        <div className="text-[18px] font-semibold">
+          {t('onboarding_thank_you_title', 'Thanks to the Postiz Contributors')}
+        </div>
+        <div className="text-[14px] text-customColor18 max-w-[440px]">
+          {t(
+            'onboarding_thank_you_body',
+            'publishr is built on top of Postiz, an open-source project. We would like to thank all the contributors who made it possible — check out the GitHub repository for more details.'
+          )}
+        </div>
+        <a
+          href="https://github.com/gitroomhq/postiz-app"
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-[8px] bg-newBgColorInner hover:bg-newColColor border border-newColColor rounded-[10px] px-[20px] py-[10px] text-[14px] font-medium transition-colors"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+          </svg>
+          {t('onboarding_view_on_github', 'View Source on GitHub')}
+        </a>
       </div>
 
       {/* Action buttons */}

@@ -13,15 +13,40 @@ import { modeEmitter } from '@gitroom/frontend/components/layout/mode.component'
 import useCookie from 'react-use-cookie';
 import { Button } from '@gitroom/react/form/button';
 import dayjs from 'dayjs';
+import 'dayjs/locale/en';
+import 'dayjs/locale/he';
+import 'dayjs/locale/ru';
+import 'dayjs/locale/zh';
+import 'dayjs/locale/fr';
+import 'dayjs/locale/es';
+import 'dayjs/locale/pt';
+import 'dayjs/locale/de';
+import 'dayjs/locale/it';
+import 'dayjs/locale/ja';
+import 'dayjs/locale/ko';
+import 'dayjs/locale/ar';
+import 'dayjs/locale/tr';
+import 'dayjs/locale/vi';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
+import i18next from 'i18next';
 import { useToaster } from '@gitroom/react/toaster/toaster';
 import { useT } from '@gitroom/react/translation/get.transation.service.client';
+
+dayjs.extend(localizedFormat);
+
+// Keep dayjs' locale in sync with the app language so billing/trial dates
+// (e.g. "January 1, 2026") render in the user's chosen language.
+const syncDayjsLocale = () => dayjs.locale(i18next.resolvedLanguage || 'en');
+i18next.on('languageChanged', syncDayjsLocale);
+syncDayjsLocale();
 
 export const EmbeddedBilling: FC<{
   stripe: Promise<Stripe>;
   secret: string;
   showCoupon?: boolean;
   autoApplyCoupon?: string;
-}> = ({ stripe, secret, showCoupon = false, autoApplyCoupon }) => {
+  planName?: string;
+}> = ({ stripe, secret, showCoupon = false, autoApplyCoupon, planName }) => {
   const [saveSecret, setSaveSecret] = useState(secret);
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useCookie('mode', 'dark');
@@ -84,16 +109,18 @@ export const EmbeddedBilling: FC<{
         <FormWrapper
           showCoupon={showCoupon}
           autoApplyCoupon={autoApplyCoupon}
+          planName={planName}
         />
       </CheckoutProvider>
     </div>
   );
 };
 
-const FormWrapper: FC<{ showCoupon?: boolean; autoApplyCoupon?: string }> = ({
-  showCoupon = false,
-  autoApplyCoupon,
-}) => {
+const FormWrapper: FC<{
+  showCoupon?: boolean;
+  autoApplyCoupon?: string;
+  planName?: string;
+}> = ({ showCoupon = false, autoApplyCoupon, planName }) => {
   const checkoutState = useCheckout();
   const toaster = useToaster();
   const [loading, setLoading] = useState(false);
@@ -123,6 +150,7 @@ const FormWrapper: FC<{ showCoupon?: boolean; autoApplyCoupon?: string }> = ({
         showCoupon={showCoupon}
         autoApplyCoupon={autoApplyCoupon}
         loading={loading}
+        planName={planName}
       />
     </form>
   );
@@ -132,7 +160,8 @@ const StripeInputs: FC<{
   showCoupon: boolean;
   autoApplyCoupon?: string;
   loading: boolean;
-}> = ({ showCoupon, autoApplyCoupon, loading }) => {
+  planName?: string;
+}> = ({ showCoupon, autoApplyCoupon, loading, planName }) => {
   const checkout = useCheckout();
   const t = useT();
   const [ready, setReady] = useState(false);
@@ -158,7 +187,7 @@ const StripeInputs: FC<{
           }}
           onReady={() => setReady(true)}
         />
-        {ready && <PriceBreakdown />}
+        {ready && <PriceBreakdown planName={planName} />}
         {showCoupon && ready && (
           <CouponInput autoApplyCoupon={autoApplyCoupon} />
         )}
@@ -190,7 +219,9 @@ const StripeInputs: FC<{
   );
 };
 
-const PriceBreakdown: FC = () => {
+const PriceBreakdown: FC<{ planName?: string }> = ({
+  planName: overridePlanName,
+}) => {
   const checkoutState = useCheckout();
   const t = useT();
 
@@ -204,14 +235,17 @@ const PriceBreakdown: FC = () => {
   const discountAmounts = checkout?.discountAmounts;
   const hasDiscount = discountAmounts && discountAmounts.length > 0;
 
-  // Get values
-  const planName = lineItem?.name || t('billing_subscription', 'Subscription');
+  // Prefer our own translated tier name over Stripe's raw (English) product name.
+  const planName =
+    overridePlanName ||
+    lineItem?.name ||
+    t('billing_subscription', 'Subscription');
   const unitAmount = lineItem?.unitAmount?.amount || '$0.00';
   const discountDisplay = hasDiscount ? discountAmounts[0] : null;
   const dueToday = checkout?.total?.total?.amount || '$0.00';
   const nextBillingTotal = recurring?.dueNext?.total?.amount;
   const nextBillingDate = recurring?.trial?.trialEnd
-    ? dayjs(recurring.trial.trialEnd * 1000).format('MMMM D, YYYY')
+    ? dayjs(recurring.trial.trialEnd * 1000).format('LL')
     : null;
   const billingInterval =
     recurring?.interval === 'month'
@@ -360,11 +394,11 @@ const AppliedCouponDisplay: FC<{
 
     if (expiresAt && typeof expiresAt === 'number') {
       const date = new Date(expiresAt * 1000);
-      return dayjs(date).format('MMMM D, YYYY');
+      return dayjs(date).format('LL');
     }
 
     if (expiresAt && typeof expiresAt === 'string') {
-      return dayjs(expiresAt).format('MMMM D, YYYY');
+      return dayjs(expiresAt).format('LL');
     }
 
     return null;
@@ -620,7 +654,7 @@ const SubmitBar: FC<{ loading: boolean }> = ({ loading }) => {
             <span className="text-textColor font-[600]">
               {dayjs(
                 checkout.checkout.recurring?.trial?.trialEnd * 1000
-              ).format('MMMM D, YYYY')}{' '}
+              ).format('LL')}{' '}
               —{' '}
             </span>
             <span className="text-textColor font-[600]">

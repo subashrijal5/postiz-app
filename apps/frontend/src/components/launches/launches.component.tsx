@@ -54,8 +54,8 @@ export const SVGLine = () => {
           y2="-28.6843"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stopColor="#662FDA" />
-          <stop offset="1" stopColor="#5720CB" />
+          <stop stopColor="#E02822" />
+          <stop offset="1" stopColor="#B71C1C" />
         </linearGradient>
         <radialGradient
           id="paint1_radial_1930_1119"

@@ -1,6 +1,27 @@
 import { SentryComponent } from '@gitroom/frontend/components/layout/sentry.component';
+import { BRAND } from '@gitroom/frontend/config/brand';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata = {
+  title: {
+    default: BRAND.name,
+    template: `%s · ${BRAND.name}`,
+  },
+  description: `Schedule and manage your social media posts with ${BRAND.name}`,
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: BRAND.logo,
+  },
+  openGraph: {
+    title: BRAND.name,
+    description: `Schedule and manage your social media posts with ${BRAND.name}`,
+    images: [BRAND.logoText],
+  },
+};
+
+const brandStyle = `:root{--new-btn-primary:${BRAND.primaryColor};--color-forth:${BRAND.primaryColor};}`;
 import '../global.scss';
 import 'react-tooltip/dist/react-tooltip.css';
 import '@copilotkit/react-ui/styles.css';
@@ -41,6 +62,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     <html>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
+        <style dangerouslySetInnerHTML={{ __html: brandStyle }} />
         {!!process.env.DATAFAST_WEBSITE_ID && (
           <Script
             data-website-id={process.env.DATAFAST_WEBSITE_ID}

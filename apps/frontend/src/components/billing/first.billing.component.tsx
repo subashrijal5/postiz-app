@@ -23,11 +23,37 @@ import {
 import { useT } from '@gitroom/react/translation/get.transation.service.client';
 import { useUser } from '@gitroom/frontend/components/layout/user.context';
 import { useDubClickId } from '@gitroom/frontend/components/layout/dubAnalytics';
-import SafeImage from '@gitroom/react/helpers/safe.image';
-import { useModals } from '@gitroom/frontend/components/layout/new-modal';
 import useCookie from 'react-use-cookie';
 import { LogoutComponent } from '@gitroom/frontend/components/layout/logout.component';
 import { DeveloperIconComponent } from '@gitroom/frontend/components/developer/developer.icon.component';
+import i18next from 'i18next';
+import type { StripeElementLocale } from '@stripe/stripe-js';
+
+// Static display-only approximation for showing JP customers roughly what a
+// USD price costs in yen. Billing itself always stays USD via Stripe.
+const USD_TO_JPY_RATE = 155;
+
+// i18next language codes we ship all map 1:1 onto Stripe's supported locales.
+const STRIPE_SUPPORTED_LOCALES: StripeElementLocale[] = [
+  'en',
+  'he',
+  'ru',
+  'zh',
+  'fr',
+  'es',
+  'pt',
+  'de',
+  'it',
+  'ja',
+  'ko',
+  'ar',
+  'tr',
+  'vi',
+];
+const toStripeLocale = (lang?: string): StripeElementLocale =>
+  STRIPE_SUPPORTED_LOCALES.includes(lang as StripeElementLocale)
+    ? (lang as StripeElementLocale)
+    : 'auto';
 
 const ModeComponent = dynamic(
   () => import('@gitroom/frontend/components/layout/mode.component'),
@@ -54,14 +80,17 @@ export const FirstBillingComponent = () => {
   const [tier, setTier] = useState('STANDARD');
   const [period, setPeriod] = useState('MONTHLY');
   const fetch = useFetch();
-  const modals = useModals();
   const t = useT();
   const [datafast_visitor_id] = useCookie('datafast_visitor_id', '');
   const [datafast_session_id] = useCookie('datafast_session_id', '');
+  // useT() re-renders this component on language change, so this stays fresh.
+  const currentLanguage = i18next.resolvedLanguage;
 
   useEffect(() => {
-    setStripe(loadStripe(stripeClient));
-  }, []);
+    setStripe(
+      loadStripe(stripeClient, { locale: toStripeLocale(currentLanguage) })
+    );
+  }, [currentLanguage]);
 
   const loadCheckout = useCallback(async () => {
     return (
@@ -78,21 +107,6 @@ export const FirstBillingComponent = () => {
       })
     ).json();
   }, [tier, period]);
-
-  const showYouTube = () => {
-    modals.openModal({
-      title: 'Grow Fast With Postiz (Play the video)',
-      children: (
-        <iframe
-          className="h-full aspect-video min-w-[800px]"
-          src="https://www.youtube.com/embed/BdsCVvEYgHU?si=vvhaZJ8I5oXXvVJS?autoplay=1"
-          title="Postiz Tutorial"
-          allow="autoplay"
-          allowFullScreen
-        />
-      ),
-    });
-  };
 
   const { data, isLoading } = useSWR(
     `/billing-${tier}-${period}`,
@@ -111,48 +125,39 @@ export const FirstBillingComponent = () => {
     []
   );
 
+  const tierName = useCallback(
+    (key: string) => t(`billing_tier_${key.toLowerCase()}`, capitalize(key)),
+    [t]
+  );
+
   const JoinOver = () => {
     return (
       <>
-        <div className="text-[46px] font-[600] leading-[110%] tablet:text-[36px] mobile:!text-[30px] whitespace-pre-line text-balance">
-          {t('billing_join_over', 'Join Over')}{' '}
-          <span className="text-[#FC69FF]">
-            {t('billing_entrepreneurs_count', '20,000+ Entrepreneurs')}
-          </span>{' '}
-          {t('billing_who_use', 'who use')}{' '}
+        <div className="inline-flex items-center gap-[8px] w-fit rounded-full border border-newColColor px-[14px] py-[6px] mb-[20px] text-[13px] font-[500] text-textItemBlur">
+          <span className="w-[6px] h-[6px] rounded-full bg-[#618DFF]" />
+          {t('billing_hero_kicker', 'Social Media, Simplified')}
+        </div>
+        <div className="text-[44px] font-[500] leading-[122%] tracking-[-0.01em] tablet:text-[34px] mobile:!text-[28px] whitespace-pre-line text-balance">
+          {t('billing_hero_headline_start', 'Grow your social presence,')}{' '}
+          <span className="text-[#618DFF]">
+            {t('billing_hero_headline_accent', 'with confidence')}
+          </span>
+        </div>
+        <div className="mt-[16px] text-[17px] leading-[155%] text-textItemBlur max-w-[440px]">
           {t(
-            'billing_postiz_grow_social',
-            'Postiz To Grow Their Social Presence'
+            'billing_hero_subline',
+            'Plan, publish, and manage every channel from one calm, powerful workspace.'
           )}
         </div>
 
-        <div className="flex" onClick={showYouTube}>
-          <div className="tablet:mb-[32px] cursor-pointer mt-[32px] flex gap-[10px] items-center underline hover:font-[700]">
-            <div>
-              <SafeImage
-                className="text-[12px]"
-                src="/icons/platforms/youtube.svg"
-                width={22.5}
-                height={16}
-                alt="YouTube"
-              />
-            </div>
-            <div>See the power of Postiz (click here)</div>
-          </div>
-        </div>
-
         {!!user?.allowTrial && (
-          <div className="flex mt-[32px] mb-[10px] gap-[15px] tablet:mt-[32px] tablet:mb-[32px] text-[16px] font-[500] mobile:flex-col">
-            <div className="flex gap-[8px]">
-              <div>
-                <CheckIconComponent />
-              </div>
+          <div className="flex flex-wrap gap-x-[24px] gap-y-[10px] mt-[28px] mb-[10px] tablet:mt-[28px] tablet:mb-[32px] text-[14px] text-textItemBlur">
+            <div className="flex items-center gap-[8px]">
+              <CheckIconComponent />
               <div>{t('billing_no_risk_trial', '100% No-Risk Free Trial')}</div>
             </div>
-            <div className="flex-1 flex gap-[8px] justify-center mobile:justify-start">
-              <div>
-                <CheckIconComponent />
-              </div>
+            <div className="flex items-center gap-[8px]">
+              <CheckIconComponent />
               <div>
                 {t(
                   'billing_pay_nothing_7_days',
@@ -160,10 +165,8 @@ export const FirstBillingComponent = () => {
                 )}
               </div>
             </div>
-            <div className="flex gap-[8px]">
-              <div>
-                <CheckIconComponent />
-              </div>
+            <div className="flex items-center gap-[8px]">
+              <CheckIconComponent />
               <div>
                 {t('billing_cancel_anytime', 'Cancel anytime, from settings')}
               </div>
@@ -211,6 +214,7 @@ export const FirstBillingComponent = () => {
               secret={data.client_secret}
               showCoupon={period === 'MONTHLY'}
               autoApplyCoupon={data.auto_apply_coupon}
+              planName={tierName(tier)}
             />
           ) : (
             <LoadingComponent />
@@ -221,80 +225,93 @@ export const FirstBillingComponent = () => {
             <div className="hidden tablet:block">
               <JoinOver />
             </div>
-            <div className="flex mb-[24px] mobile:flex-col">
-              <div className="flex-1 text-[24px] font-[700]">
-                {t('billing_choose_plan', 'Choose a Plan')}
-              </div>
-              <div className="h-[44px] px-[6px] mobile:px-0 flex items-center justify-center mobile:justify-start gap-[12px] border border-newColColor rounded-[12px] select-none">
-                <div
-                  className={clsx(
-                    'h-[32px] mobile:flex-1 rounded-[6px] text-[16px] px-[12px] flex justify-center items-center',
-                    period === 'MONTHLY'
-                      ? 'bg-boxFocused text-textItemFocused'
-                      : 'cursor-pointer'
-                  )}
-                  onClick={() => setPeriod('MONTHLY')}
-                >
-                  {t('billing_monthly', 'Monthly')}
+            <div className="rounded-[24px] border border-newColColor bg-newBgColorInner p-[28px] tablet:p-[18px] mobile:!p-[18px]">
+              <div className="flex mb-[28px] mobile:flex-col">
+                <div className="flex-1 text-[22px] font-[500]">
+                  {t('billing_choose_plan', 'Choose a Plan')}
                 </div>
-                <div
-                  className={clsx(
-                    'gap-[10px] h-[32px] mobile:flex-1 rounded-[6px] text-[16px] px-[12px] flex justify-center items-center',
-                    period === 'YEARLY'
-                      ? 'bg-boxFocused text-textItemFocused'
-                      : 'cursor-pointer'
-                  )}
-                  onClick={() => setPeriod('YEARLY')}
-                >
-                  <div>{t('billing_yearly', 'Yearly')}</div>
-                  <div className="bg-[#AA0FA4] text-[white] px-[8px] rounded-[4px] mobile:hidden">
-                    {t('billing_20_percent_off', '20% Off')}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-[8px] mobile:!grid-cols-2 tablet:grid-cols-4">
-              {price.map(
-                ([key, value]) => (
+                <div className="h-[44px] px-[6px] mobile:px-0 flex items-center justify-center mobile:justify-start gap-[12px] border border-newColColor rounded-[12px] select-none">
                   <div
-                    onClick={() => setTier(key)}
-                    key={key}
                     className={clsx(
-                      'cursor-pointer select-none w-[266px] h-[138px] tablet:w-full tablet:h-[124px] p-[24px] tablet:p-[15px] rounded-[20px] flex flex-col',
-                      key === tier
-                        ? 'border-[1.5px] border-[#618DFF]'
-                        : 'border-[1.5px] border-newColColor'
+                      'h-[32px] mobile:flex-1 rounded-[6px] text-[16px] px-[12px] flex justify-center items-center',
+                      period === 'MONTHLY'
+                        ? 'bg-boxFocused text-textItemFocused'
+                        : 'cursor-pointer'
                     )}
+                    onClick={() => setPeriod('MONTHLY')}
                   >
-                    <div className="text-[20px] mobile:text-[18px] font-[500]">
-                      {capitalize(key)}
-                    </div>
-                    <div className="text-[24px] mobile:text-[18px] font-[400]">
-                      <span className="text-[44px] mobile:text-[30px] font-[600]">
-                        $
-                        {
-                          value[
-                            period === 'MONTHLY' ? 'month_price' : 'year_price'
-                          ]
-                        }
-                      </span>{' '}
-                      {period === 'MONTHLY'
-                        ? t('billing_per_month', '/ month')
-                        : t('billing_per_year', '/ year')}
+                    {t('billing_monthly', 'Monthly')}
+                  </div>
+                  <div
+                    className={clsx(
+                      'gap-[10px] h-[32px] mobile:flex-1 rounded-[6px] text-[16px] px-[12px] flex justify-center items-center',
+                      period === 'YEARLY'
+                        ? 'bg-boxFocused text-textItemFocused'
+                        : 'cursor-pointer'
+                    )}
+                    onClick={() => setPeriod('YEARLY')}
+                  >
+                    <div>{t('billing_yearly', 'Yearly')}</div>
+                    <div className="text-[#618DFF] text-[13px] mobile:hidden">
+                      {t('billing_20_percent_off', '20% Off')}
                     </div>
                   </div>
-                ),
-                []
-              )}
-            </div>
-            <div className="flex flex-col mt-[54px] gap-[24px] tablet:mt-[40px]">
-              <div className="text-[24px] font-[700]">
-                {t('billing_features', 'Features')}
+                </div>
               </div>
-              <BillingFeatures tier={tier} />
+              <div className="grid grid-cols-2 gap-[10px] mobile:!grid-cols-1 tablet:grid-cols-4">
+                {price.map(([key, value]) => {
+                  const currentPrice =
+                    value[period === 'MONTHLY' ? 'month_price' : 'year_price'];
+                  const selected = key === tier;
+                  return (
+                    <div
+                      onClick={() => setTier(key)}
+                      key={key}
+                      className={clsx(
+                        'relative cursor-pointer select-none w-full min-h-[144px] tablet:h-auto mobile:!h-auto p-[20px] rounded-[16px] flex flex-col gap-[4px] transition-colors duration-150',
+                        selected
+                          ? 'border border-[#618DFF] bg-boxFocused/5'
+                          : 'border border-newColColor hover:border-textItemBlur'
+                      )}
+                    >
+                      {selected && (
+                        <div className="absolute top-[16px] right-[16px] w-[18px] h-[18px] rounded-full border border-[#618DFF] flex items-center justify-center">
+                          <div className="w-[8px] h-[8px] rounded-full bg-[#618DFF]" />
+                        </div>
+                      )}
+                      <div className="text-[16px] font-[500] text-textItemBlur">
+                        {tierName(key)}
+                      </div>
+                      <div className="text-[22px] font-[400] mt-[4px]">
+                        <span className="text-[32px] font-[500]">
+                          ${currentPrice}
+                        </span>{' '}
+                        <span className="text-[14px] text-textItemBlur">
+                          {period === 'MONTHLY'
+                            ? t('billing_per_month', '/ month')
+                            : t('billing_per_year', '/ year')}
+                        </span>
+                      </div>
+                      {i18next.resolvedLanguage === 'ja' && (
+                        <div className="text-[13px] text-textItemBlur">
+                          {t('billing_approx_jpy', '約')} ¥
+                          {(currentPrice * USD_TO_JPY_RATE).toLocaleString(
+                            'ja-JP'
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="flex flex-col mt-[36px] gap-[16px]">
+                <div className="text-[22px] font-[500]">
+                  {t('billing_features', 'Features')}
+                </div>
+                <BillingFeatures tier={tier} />
+              </div>
             </div>
-            <div className="flex flex-col mobile:hidden tablet:hidden">
-              {/*<div>asd</div>*/}
+            <div className="flex flex-col mt-[32px] mobile:hidden tablet:hidden">
               <FAQComponent />
             </div>
           </div>
