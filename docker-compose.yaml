@@ -8,8 +8,9 @@ services:
       MAIN_URL: 'http://localhost:4007'
       FRONTEND_URL: 'http://localhost:4007'
       NEXT_PUBLIC_BACKEND_URL: 'http://localhost:4007/api'
-      JWT_SECRET: 'random string that is unique to every install - just type random characters here!'
-      DATABASE_URL: 'postgresql://postiz-user:postiz-password@postiz-postgres:5432/postiz-db-local'
+      # JWT_SECRET falls back to the original value if not supplied via environment
+      JWT_SECRET: '${JWT_SECRET:-random string that is unique to every install - just type random characters here!}'
+      DATABASE_URL: 'postgresql://postiz-user:${POSTIZ_DB_PASSWORD:-postiz-password}@postiz-postgres:5432/postiz-db-local'
       REDIS_URL: 'redis://postiz-redis:6379'
       BACKEND_INTERNAL_URL: 'http://localhost:3000'
       TEMPORAL_ADDRESS: 'temporal:7233'
@@ -23,48 +24,48 @@ services:
 
       # === Cloudflare (R2) Settings
       # STORAGE_PROVIDER: 'cloudflare'
-      # CLOUDFLARE_ACCOUNT_ID: 'your-account-id'
-      # CLOUDFLARE_ACCESS_KEY: 'your-access-key'
-      # CLOUDFLARE_SECRET_ACCESS_KEY: 'your-secret-access-key'
-      # CLOUDFLARE_BUCKETNAME: 'your-bucket-name'
-      # CLOUDFLARE_BUCKET_URL: 'https://your-bucket-url.r2.cloudflarestorage.com/'
+      # CLOUDFLARE_ACCOUNT_ID: '${CLOUDFLARE_ACCOUNT_ID:-}'
+      # CLOUDFLARE_ACCESS_KEY: '${CLOUDFLARE_ACCESS_KEY:-}'
+      # CLOUDFLARE_SECRET_ACCESS_KEY: '${CLOUDFLARE_SECRET_ACCESS_KEY:-}'
+      # CLOUDFLARE_BUCKETNAME: '${CLOUDFLARE_BUCKETNAME:-}'
+      # CLOUDFLARE_BUCKET_URL: '${CLOUDFLARE_BUCKET_URL:-}'
       # CLOUDFLARE_REGION: 'auto'
 
       # === Social Media API Settings
       X_URL: ''
       X_API_KEY: ''
-      X_API_SECRET: ''
+      X_API_SECRET: '${X_API_SECRET:-}'
       LINKEDIN_CLIENT_ID: ''
-      LINKEDIN_CLIENT_SECRET: ''
+      LINKEDIN_CLIENT_SECRET: '${LINKEDIN_CLIENT_SECRET:-}'
       REDDIT_CLIENT_ID: ''
-      REDDIT_CLIENT_SECRET: ''
+      REDDIT_CLIENT_SECRET: '${REDDIT_CLIENT_SECRET:-}'
       GITHUB_CLIENT_ID: ''
-      GITHUB_CLIENT_SECRET: ''
-      BEEHIIVE_API_KEY: ''
+      GITHUB_CLIENT_SECRET: '${GITHUB_CLIENT_SECRET:-}'
+      BEEHIIVE_API_KEY: '${BEEHIIVE_API_KEY:-}'
       BEEHIIVE_PUBLICATION_ID: ''
       THREADS_APP_ID: ''
-      THREADS_APP_SECRET: ''
+      THREADS_APP_SECRET: '${THREADS_APP_SECRET:-}'
       FACEBOOK_APP_ID: ''
-      FACEBOOK_APP_SECRET: ''
+      FACEBOOK_APP_SECRET: '${FACEBOOK_APP_SECRET:-}'
       YOUTUBE_CLIENT_ID: ''
-      YOUTUBE_CLIENT_SECRET: ''
+      YOUTUBE_CLIENT_SECRET: '${YOUTUBE_CLIENT_SECRET:-}'
       TIKTOK_CLIENT_ID: ''
-      TIKTOK_CLIENT_SECRET: ''
+      TIKTOK_CLIENT_SECRET: '${TIKTOK_CLIENT_SECRET:-}'
       PINTEREST_CLIENT_ID: ''
-      PINTEREST_CLIENT_SECRET: ''
+      PINTEREST_CLIENT_SECRET: '${PINTEREST_CLIENT_SECRET:-}'
       DRIBBBLE_CLIENT_ID: ''
-      DRIBBBLE_CLIENT_SECRET: ''
+      DRIBBBLE_CLIENT_SECRET: '${DRIBBBLE_CLIENT_SECRET:-}'
       TUMBLR_CLIENT_ID: ''
-      TUMBLR_CLIENT_SECRET: ''
+      TUMBLR_CLIENT_SECRET: '${TUMBLR_CLIENT_SECRET:-}'
       DISCORD_CLIENT_ID: ''
-      DISCORD_CLIENT_SECRET: ''
-      DISCORD_BOT_TOKEN_ID: ''
+      DISCORD_CLIENT_SECRET: '${DISCORD_CLIENT_SECRET:-}'
+      DISCORD_BOT_TOKEN_ID: '${DISCORD_BOT_TOKEN_ID:-}'
       SLACK_ID: ''
-      SLACK_SECRET: ''
-      SLACK_SIGNING_SECRET: ''
+      SLACK_SECRET: '${SLACK_SECRET:-}'
+      SLACK_SIGNING_SECRET: '${SLACK_SIGNING_SECRET:-}'
       MASTODON_URL: 'https://mastodon.social'
       MASTODON_CLIENT_ID: ''
-      MASTODON_CLIENT_SECRET: ''
+      MASTODON_CLIENT_SECRET: '${MASTODON_CLIENT_SECRET:-}'
 
       # === OAuth & Authentik Settings
       # NEXT_PUBLIC_POSTIZ_OAUTH_DISPLAY_NAME: 'Authentik'
@@ -74,8 +75,8 @@ services:
       # POSTIZ_OAUTH_AUTH_URL: 'https://auth.example.com/application/o/authorize'
       # POSTIZ_OAUTH_TOKEN_URL: 'https://auth.example.com/application/o/token'
       # POSTIZ_OAUTH_USERINFO_URL: 'https://authentik.example.com/application/o/userinfo'
-      # POSTIZ_OAUTH_CLIENT_ID: ''
-      # POSTIZ_OAUTH_CLIENT_SECRET: ''
+      # POSTIZ_OAUTH_CLIENT_ID: '${POSTIZ_OAUTH_CLIENT_ID:-}'
+      # POSTIZ_OAUTH_CLIENT_SECRET: '${POSTIZ_OAUTH_CLIENT_SECRET:-}'
       # POSTIZ_OAUTH_SCOPE: "openid profile email"  # Optional: uncomment to override default scope
 
       # === Sentry
@@ -84,7 +85,7 @@ services:
       # SENTRY_SPOTLIGHT: '1'
 
       # === Misc Settings
-      OPENAI_API_KEY: ''
+      OPENAI_API_KEY: '${OPENAI_API_KEY:-}'
       NEXT_PUBLIC_DISCORD_SUPPORT: ''
       NEXT_PUBLIC_POLOTNO: ''
       API_LIMIT: 30
@@ -92,24 +93,24 @@ services:
       # === Payment / Stripe Settings
       FEE_AMOUNT: 0.05
       STRIPE_PUBLISHABLE_KEY: ''
-      STRIPE_SECRET_KEY: ''
-      STRIPE_SIGNING_KEY: ''
-      STRIPE_SIGNING_KEY_CONNECT: ''
+      STRIPE_SECRET_KEY: '${STRIPE_SECRET_KEY:-}'
+      STRIPE_SIGNING_KEY: '${STRIPE_SIGNING_KEY:-}'
+      STRIPE_SIGNING_KEY_CONNECT: '${STRIPE_SIGNING_KEY_CONNECT:-}'
 
       # === Developer Settings
       NX_ADD_PLUGINS: false
 
       # === Short Link Service Settings (Optional - leave blank if unused)
-      # DUB_TOKEN: ""
-      # DUB_API_ENDPOINT: "https://api.dub.co"
-      # DUB_SHORT_LINK_DOMAIN: "dub.sh"
-      # SHORT_IO_SECRET_KEY: ""
-      # KUTT_API_KEY: ""
-      # KUTT_API_ENDPOINT: "https://kutt.it/api/v2"
-      # KUTT_SHORT_LINK_DOMAIN: "kutt.it"
-      # LINK_DRIP_API_KEY: ""
-      # LINK_DRIP_API_ENDPOINT: "https://api.linkdrip.com/v1/"
-      # LINK_DRIP_SHORT_LINK_DOMAIN: "dripl.ink"
+      # DUB_TOKEN: '${DUB_TOKEN:-}'
+      # DUB_API_ENDPOINT: 'https://api.dub.co'
+      # DUB_SHORT_LINK_DOMAIN: 'dub.sh'
+      # SHORT_IO_SECRET_KEY: '${SHORT_IO_SECRET_KEY:-}'
+      # KUTT_API_KEY: '${KUTT_API_KEY:-}'
+      # KUTT_API_ENDPOINT: 'https://kutt.it/api/v2'
+      # KUTT_SHORT_LINK_DOMAIN: 'kutt.it'
+      # LINK_DRIP_API_KEY: '${LINK_DRIP_API_KEY:-}'
+      # LINK_DRIP_API_ENDPOINT: 'https://api.linkdrip.com/v1/'
+      # LINK_DRIP_SHORT_LINK_DOMAIN: 'dripl.ink'
 
     volumes:
       - postiz-config:/config/
@@ -130,7 +131,7 @@ services:
     container_name: postiz-postgres
     restart: always
     environment:
-      POSTGRES_PASSWORD: postiz-password
+      POSTGRES_PASSWORD: '${POSTIZ_DB_PASSWORD:-postiz-password}'
       POSTGRES_USER: postiz-user
       POSTGRES_DB: postiz-db-local
     volumes:
@@ -191,7 +192,7 @@ services:
     container_name: temporal-postgresql
     image: postgres:16
     environment:
-      POSTGRES_PASSWORD: temporal
+      POSTGRES_PASSWORD: '${TEMPORAL_DB_PASSWORD:-temporal}'
       POSTGRES_USER: temporal
     networks:
       - temporal-network
@@ -212,7 +213,7 @@ services:
       - DB=postgres12
       - DB_PORT=5432
       - POSTGRES_USER=temporal
-      - POSTGRES_PWD=temporal
+      - POSTGRES_PWD=${TEMPORAL_DB_PASSWORD:-temporal}
       - POSTGRES_SEEDS=temporal-postgresql
       - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-sql.yaml
       - ENABLE_ES=true
