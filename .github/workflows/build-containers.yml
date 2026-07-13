@@ -101,3 +101,11 @@ jobs:
       - name: Verify Manifest
         run: |
           docker manifest inspect ghcr.io/subashrijal5/postiz-app:latest
+
+  trigger-deploy:
+    needs: build-container-manifest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger deployment
+        run: |
+          curl -X POST "${{ secrets.DEPLOY_WEBHOOK }}"
