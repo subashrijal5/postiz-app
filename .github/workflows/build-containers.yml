@@ -30,10 +30,8 @@ jobs:
         component:
           - name: frontend
             target: runtime-frontend
-          - name: backend
-            target: runtime-backend
-          - name: orchestrator
-            target: runtime-orchestrator
+          - name: server
+            target: runtime-server
     runs-on: ${{ matrix.arch.runnertags }}
     steps:
       - name: Checkout
@@ -71,7 +69,7 @@ jobs:
     needs: [build-containers, build-containers-common]
     strategy:
       matrix:
-        component: [frontend, backend, orchestrator]
+        component: [frontend, server]
     runs-on: ubuntu-latest
     steps:
       - name: Login to ghcr
