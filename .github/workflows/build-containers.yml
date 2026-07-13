@@ -108,4 +108,6 @@ jobs:
     steps:
       - name: Trigger deployment
         run: |
-          curl -X POST "${{ secrets.DEPLOY_WEBHOOK }}"
+          curl -X POST "${{ secrets.DEPLOY_WEBHOOK }}" \
+            -w "\nHTTP status: %{http_code}\n" \
+            --fail-with-body
