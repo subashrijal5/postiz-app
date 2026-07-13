@@ -22,12 +22,19 @@ jobs:
     needs: build-containers-common
     strategy:
       matrix:
-        include:
+        arch:
           - runnertags: ubuntu-latest
-            arch: amd64
+            name: amd64
           - runnertags: ubuntu-24.04-arm
-            arch: arm64
-    runs-on: ${{ matrix.runnertags }}
+            name: arm64
+        component:
+          - name: frontend
+            target: runtime-frontend
+          - name: backend
+            target: runtime-backend
+          - name: orchestrator
+            target: runtime-orchestrator
+    runs-on: ${{ matrix.arch.runnertags }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -48,18 +55,23 @@ jobs:
         env:
           CONTAINERVER: ${{ needs.build-containers-common.outputs.containerver }}
           NEXT_PUBLIC_VERSION: ${{ github.ref_name }}
+          IMAGE: ghcr.io/subashrijal5/postiz-app-${{ matrix.component.name }}
         run: |
-          docker buildx build --platform linux/${{ matrix.arch }} \
+          docker buildx build --platform linux/${{ matrix.arch.name }} \
             -f Dockerfile \
-            -t ghcr.io/subashrijal5/postiz-app:${{ env.CONTAINERVER }}-${{ matrix.arch }} \
+            --target ${{ matrix.component.target }} \
+            -t ${{ env.IMAGE }}:${{ env.CONTAINERVER }}-${{ matrix.arch.name }} \
             --build-arg NEXT_PUBLIC_VERSION=${{ env.NEXT_PUBLIC_VERSION }} \
             --pull \
             --no-cache \
             --provenance=false --sbom=false \
-            --output "type=registry,name=ghcr.io/subashrijal5/postiz-app:${{ env.CONTAINERVER }}-${{ matrix.arch }}" .
+            --output "type=registry,name=${{ env.IMAGE }}:${{ env.CONTAINERVER }}-${{ matrix.arch.name }}" .
 
   build-container-manifest:
     needs: [build-containers, build-containers-common]
+    strategy:
+      matrix:
+        component: [frontend, backend, orchestrator]
     runs-on: ubuntu-latest
     steps:
       - name: Login to ghcr
@@ -72,35 +84,38 @@ jobs:
       - name: Create Docker Manifest
         env:
           CONTAINERVER: ${{ needs.build-containers-common.outputs.containerver }}
+          IMAGE: ghcr.io/subashrijal5/postiz-app-${{ matrix.component }}
         run: |
           # Verify the architecture images
           echo "Verifying AMD64 image:"
-          docker buildx imagetools inspect ghcr.io/subashrijal5/postiz-app:${{ env.CONTAINERVER }}-amd64
-          
-          echo "Verifying ARM64 image:"
-          docker buildx imagetools inspect ghcr.io/subashrijal5/postiz-app:${{ env.CONTAINERVER }}-arm64
-          
-          # Try to remove any existing manifests first
-          docker manifest rm ghcr.io/subashrijal5/postiz-app:${{ env.CONTAINERVER }} || true
-          docker manifest rm ghcr.io/subashrijal5/postiz-app:latest || true
-          
-          # Create and push the version-specific manifest
-          docker manifest create ghcr.io/subashrijal5/postiz-app:${{ env.CONTAINERVER }} \
-            --amend ghcr.io/subashrijal5/postiz-app:${{ env.CONTAINERVER }}-amd64 \
-            --amend ghcr.io/subashrijal5/postiz-app:${{ env.CONTAINERVER }}-arm64
+          docker buildx imagetools inspect ${{ env.IMAGE }}:${{ env.CONTAINERVER }}-amd64
 
-          docker manifest push ghcr.io/subashrijal5/postiz-app:${{ env.CONTAINERVER }}
+          echo "Verifying ARM64 image:"
+          docker buildx imagetools inspect ${{ env.IMAGE }}:${{ env.CONTAINERVER }}-arm64
+
+          # Try to remove any existing manifests first
+          docker manifest rm ${{ env.IMAGE }}:${{ env.CONTAINERVER }} || true
+          docker manifest rm ${{ env.IMAGE }}:latest || true
+
+          # Create and push the version-specific manifest
+          docker manifest create ${{ env.IMAGE }}:${{ env.CONTAINERVER }} \
+            --amend ${{ env.IMAGE }}:${{ env.CONTAINERVER }}-amd64 \
+            --amend ${{ env.IMAGE }}:${{ env.CONTAINERVER }}-arm64
+
+          docker manifest push ${{ env.IMAGE }}:${{ env.CONTAINERVER }}
 
           # Create and push the latest manifest
-          docker manifest create ghcr.io/subashrijal5/postiz-app:latest \
-            --amend ghcr.io/subashrijal5/postiz-app:${{ env.CONTAINERVER }}-amd64 \
-            --amend ghcr.io/subashrijal5/postiz-app:${{ env.CONTAINERVER }}-arm64
+          docker manifest create ${{ env.IMAGE }}:latest \
+            --amend ${{ env.IMAGE }}:${{ env.CONTAINERVER }}-amd64 \
+            --amend ${{ env.IMAGE }}:${{ env.CONTAINERVER }}-arm64
 
-          docker manifest push ghcr.io/subashrijal5/postiz-app:latest
+          docker manifest push ${{ env.IMAGE }}:latest
 
       - name: Verify Manifest
+        env:
+          IMAGE: ghcr.io/subashrijal5/postiz-app-${{ matrix.component }}
         run: |
-          docker manifest inspect ghcr.io/subashrijal5/postiz-app:latest
+          docker manifest inspect ${{ env.IMAGE }}:latest
 
   trigger-deploy:
     needs: build-container-manifest
