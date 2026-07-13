@@ -105,9 +105,14 @@ jobs:
   trigger-deploy:
     needs: build-container-manifest
     runs-on: ubuntu-latest
+    env:
+      DEPLOY_BRANCH: ${{ vars.DEPLOY_BRANCH || 'main' }}
     steps:
       - name: Trigger deployment
         run: |
           curl -X POST "${{ secrets.DEPLOY_WEBHOOK }}" \
+            -H "Content-Type: application/json" \
+            -H "X-GitHub-Event: push" \
+            -d "{\"ref\":\"refs/heads/${DEPLOY_BRANCH}\",\"repository\":{\"full_name\":\"${{ github.repository }}\"}}" \
             -w "\nHTTP status: %{http_code}\n" \
             --fail-with-body
