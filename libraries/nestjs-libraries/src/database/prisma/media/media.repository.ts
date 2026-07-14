@@ -38,13 +38,10 @@ export class MediaRepository {
   }
 
   deleteMedia(org: string, id: string) {
-    return this._media.model.media.update({
+    return this._media.model.media.delete({
       where: {
         id,
         organizationId: org,
-      },
-      data: {
-        deletedAt: new Date(),
       },
     });
   }
