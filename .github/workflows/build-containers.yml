@@ -1,13 +1,11 @@
 ---
 name: "Build Containers"
 
-# DISABLED: publishing pipeline — pushes the image to ghcr.io/gitroomhq (upstream
-# registry). Commented out so it never runs (including manual dispatch).
-# on:
-#   workflow_dispatch:
-#   push:
-#     tags:
-#       - '*'
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - '*'
 
 jobs:
   build-containers-common:
