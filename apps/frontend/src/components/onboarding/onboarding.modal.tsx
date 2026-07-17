@@ -282,7 +282,7 @@ const OnboardingStep2: FC<{ onBack: () => void; onFinish: () => void }> = ({
           )}
         </div>
         <a
-          href="https://github.com/gitroomhq/postiz-app"
+          href="https://github.com/subashrijal5/postiz-app"
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-[8px] bg-newBgColorInner hover:bg-newColColor border border-newColColor rounded-[10px] px-[20px] py-[10px] text-[14px] font-medium transition-colors"
