@@ -16,7 +16,7 @@ export default async function AuthLayout({
           <div className="flex justify-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/publishr-logo-dark.png"
+              src={BRAND.logoTextDark}
               alt={BRAND.name}
               className="h-[33px] w-auto"
             />
