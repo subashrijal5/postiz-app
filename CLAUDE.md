@@ -111,3 +111,4 @@ Import as `import * as Sentry from "@sentry/nextjs"`, initialize with `enableLog
 - The system is **in production with many users** — changes must not break existing users; a data migration may be required for schema/behavior changes.
 - Use conventional commits (`feat:`, `fix:`, `chore:`, ...).
 - Keep `.env.example` updated when introducing new environment variables.
+- Whenever you generate a PR, PR description, or similar, **always** follow the PR Template (`.github/PULL_REQUEST_TEMPLATE.md`).
