@@ -28,7 +28,7 @@ export class TemporalRegister implements OnModuleInit {
         namespace: process.env.TEMPORAL_NAMESPACE || 'default',
         searchAttributes: missingAttributes.reduce((all, current) => {
           // @ts-ignore
-          all[current] = 1;
+          all[current] = 2;
           return all;
         }, {}),
       });
