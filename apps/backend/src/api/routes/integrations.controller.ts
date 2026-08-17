@@ -8,6 +8,7 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
+import * as Sentry from '@sentry/nestjs';
 import { ioRedis } from '@gitroom/nestjs-libraries/redis/redis.service';
 import { IntegrationManager } from '@gitroom/nestjs-libraries/integrations/integration.manager';
 import { IntegrationService } from '@gitroom/nestjs-libraries/database/prisma/integrations/integration.service';
@@ -249,6 +250,22 @@ export class IntegrationsController {
 
       return { url };
     } catch (err) {
+      // The client can only render a generic "could not connect to the
+      // platform" toast, so unless the provider's own failure is recorded here
+      // it is lost entirely. These are almost always instance configuration
+      // problems — wrong credentials, an unregistered redirect URI, OAuth not
+      // enabled on the provider's side — and they are undiagnosable without
+      // the underlying message.
+      Sentry.captureException(err, {
+        tags: { integration },
+        extra: { organizationId: org.id },
+      });
+
+      console.error(
+        `[integrations] could not generate an auth url for "${integration}"`,
+        err
+      );
+
       return { err: true };
     }
   }
