@@ -56,6 +56,7 @@ export class OrganizationRepository {
     return this._organization.model.organization.findFirst({
       where: {
         apiKey: api,
+        deletedAt: null,
       },
       include: {
         subscription: {
@@ -118,11 +119,13 @@ export class OrganizationRepository {
                 {
                   name: {
                     contains: name,
+                    mode: 'insensitive',
                   },
                 },
                 {
                   email: {
                     contains: name,
+                    mode: 'insensitive',
                   },
                 },
                 {
@@ -137,9 +140,16 @@ export class OrganizationRepository {
       },
       select: {
         id: true,
+        role: true,
         organization: {
           select: {
             id: true,
+            name: true,
+            subscription: {
+              select: {
+                subscriptionTier: true,
+              },
+            },
           },
         },
         user: {
@@ -167,6 +177,7 @@ export class OrganizationRepository {
   async getOrgsByUserId(userId: string) {
     return this._organization.model.organization.findMany({
       where: {
+        deletedAt: null,
         users: {
           some: {
             userId,
@@ -199,6 +210,14 @@ export class OrganizationRepository {
     return this._organization.model.organization.findUnique({
       where: {
         id,
+      },
+    });
+  }
+
+  getUsersByEmail(email: string) {
+    return this._user.model.user.findMany({
+      where: {
+        email,
       },
     });
   }
@@ -369,6 +388,17 @@ export class OrganizationRepository {
             },
           },
         },
+      },
+    });
+  }
+
+  deleteOrganization(orgId: string) {
+    return this._organization.model.organization.update({
+      where: {
+        id: orgId,
+      },
+      data: {
+        deletedAt: new Date(),
       },
     });
   }

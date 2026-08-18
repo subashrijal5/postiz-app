@@ -112,3 +112,7 @@ Import as `import * as Sentry from "@sentry/nextjs"`, initialize with `enableLog
 - Use conventional commits (`feat:`, `fix:`, `chore:`, ...).
 - Keep `.env.example` updated when introducing new environment variables.
 - Whenever you generate a PR, PR description, or similar, **always** follow the PR Template (`.github/PULL_REQUEST_TEMPLATE.md`).
+- Never use raw SQL queries — always go through Prisma.
+- Avoid creating new files of pure algorithm logic; match new code to existing patterns elsewhere in the codebase rather than inventing new ones.
+- Temporal workflow files already in `origin/main` can never be changed — changing a workflow fails all its in-flight activities. Instead, create a new versioned workflow and update all call sites to it. Likewise, workflow activity parameters cannot change; add a new activity (and a new workflow that uses it) instead.
+- Code must stay generic: provider-specific logic (e.g. Facebook/Instagram) never belongs in generic code paths. Extend the provider interface with a new function, call it generically, and implement the specifics inside the provider — never `if (facebookProvider) {}` in shared code.
